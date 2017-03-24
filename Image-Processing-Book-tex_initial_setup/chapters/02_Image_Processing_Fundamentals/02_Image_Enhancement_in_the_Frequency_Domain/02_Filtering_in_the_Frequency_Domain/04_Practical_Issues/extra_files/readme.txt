@@ -1,1 +1,0 @@
-This directory is for any additional files you might consider relevant to your section. While you're welcome to upload source code, images, etc, please keep in mind that GitHub repositories are limited to 1GB in size. Please try not to exceed a few MB of files at most, if possible.
