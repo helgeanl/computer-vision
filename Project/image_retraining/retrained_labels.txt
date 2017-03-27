@@ -1,0 +1,10 @@
+speed 30 jpg
+speed 20 jpg
+speed 50 jpg
+speed 100 jpg
+speed 70 jpg
+speed 60 jpg
+overtaking jpg
+speed 120 jpg
+speed 80 jpg
+speed sone over 80 jpg
