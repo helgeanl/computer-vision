@@ -1,4 +1,15 @@
 import tensorflow as tf, sys
+import time
+
+# Prints out the time spent on a given function
+def print_timing (func):
+  def wrapper (*arg):
+    t1 = time.time ()
+    res = func (*arg)
+    t2 = time.time ()
+    print ("--->{} took {} ms".format (func.__name__, (t2 - t1) * 1000.0))
+    return res
+  return wrapper
 
 image_path = sys.argv[1]
 
@@ -15,10 +26,8 @@ with tf.gfile.FastGFile("retrained_graph_42signs.pb", 'rb') as f:
     graph_def.ParseFromString(f.read())
     _ = tf.import_graph_def(graph_def, name='')
 
-with tf.Session() as sess:
-    # Feed the image_data as input to the graph and get first prediction
-    softmax_tensor = sess.graph.get_tensor_by_name('final_result:0')
-
+@print_timing
+def predict_print(softmax_tensor,image_data):
     predictions = sess.run(softmax_tensor, \
              {'DecodeJpeg/contents:0': image_data})
 
@@ -29,3 +38,8 @@ with tf.Session() as sess:
         human_string = label_lines[node_id]
         score = predictions[0][node_id]
         print('%s (score = %.5f)' % (human_string, score))
+
+with tf.Session() as sess:
+    # Feed the image_data as input to the graph and get first prediction
+    softmax_tensor = sess.graph.get_tensor_by_name('final_result:0')
+    predict_print(softmax_tensor,image_data)
