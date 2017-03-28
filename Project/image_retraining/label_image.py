@@ -27,7 +27,7 @@ with tf.gfile.FastGFile("retrained_graph_42signs.pb", 'rb') as f:
     _ = tf.import_graph_def(graph_def, name='')
 
 @print_timing
-def print_top(top_k):
+def print_top(top_k,predictions):
     for node_id in top_k:
         human_string = label_lines[node_id]
         score = predictions[0][node_id]
