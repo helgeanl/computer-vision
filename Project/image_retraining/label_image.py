@@ -40,7 +40,7 @@ def predict(softmax_tensor,image_data):
 
     # Sort to show labels of first prediction in order of confidence
     top_k = predictions[0].argsort()[-len(predictions[0]):][::-1]
-    print_top(top_k)
+    print_top(top_k,predictions)
 
 
 
