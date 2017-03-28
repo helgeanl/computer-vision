@@ -47,4 +47,4 @@ def predict(softmax_tensor,image_data):
 with tf.Session() as sess:
     # Feed the image_data as input to the graph and get first prediction
     softmax_tensor = sess.graph.get_tensor_by_name('final_result:0')
-    predict_print(softmax_tensor,image_data)
+    predict(softmax_tensor,image_data)
