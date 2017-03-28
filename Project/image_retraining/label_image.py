@@ -27,17 +27,22 @@ with tf.gfile.FastGFile("retrained_graph_42signs.pb", 'rb') as f:
     _ = tf.import_graph_def(graph_def, name='')
 
 @print_timing
-def predict_print(softmax_tensor,image_data):
+def print_top(top_k):
+    for node_id in top_k:
+        human_string = label_lines[node_id]
+        score = predictions[0][node_id]
+        print('%s (score = %.5f)' % (human_string, score))
+
+@print_timing
+def predict(softmax_tensor,image_data):
     predictions = sess.run(softmax_tensor, \
              {'DecodeJpeg/contents:0': image_data})
 
     # Sort to show labels of first prediction in order of confidence
     top_k = predictions[0].argsort()[-len(predictions[0]):][::-1]
+    print_top(top_k)
 
-    for node_id in top_k:
-        human_string = label_lines[node_id]
-        score = predictions[0][node_id]
-        print('%s (score = %.5f)' % (human_string, score))
+
 
 with tf.Session() as sess:
     # Feed the image_data as input to the graph and get first prediction
