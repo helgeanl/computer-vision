@@ -191,10 +191,10 @@ mpl.pyplot.imshow(new_img, cmap='gray')
 
 
 
-white_output = 'challenge3Done.mp4'
-clip1 = VideoFileClip('challenge3.mp4')  # .subclip(14, 16)
-white_clip = clip1.fl_image(processImage)  # NOTE: this function expects color images!!
-white_clip.write_videofile(white_output, audio=False)
+#white_output = 'challenge3Done.mp4'
+#clip1 = VideoFileClip('challenge3.mp4')  # .subclip(14, 16)
+#white_clip = clip1.fl_image(processImage)  # NOTE: this function expects color images!!
+#white_clip.write_videofile(white_output, audio=False)
 
 
 
