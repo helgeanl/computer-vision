@@ -91,3 +91,6 @@ ENV/
 # Training Data
 data/
 bottlenecks/
+
+# Models
+models/
