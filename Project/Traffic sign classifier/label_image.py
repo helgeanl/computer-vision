@@ -1,3 +1,11 @@
+"""
+Predict the class of an image
+
+args : [-h] -i IMAGE -m MODEL [--info INFO] [--plot_model PLOT_MODEL]
+             [--plot_name PLOT_NAME] [-n NORMALIZE] [-p PROBABILITIES]
+
+"""
+
 import argparse
 import numpy as np
 import pandas as pd
