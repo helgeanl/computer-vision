@@ -1,17 +1,19 @@
+import argparse
+import numpy as np
+import pandas as pd
+import time as time
+
 from keras.models import load_model
 from keras.preprocessing import image as image_utils
 from keras.utils import plot_model
-import numpy as np
-import argparse
-import time as time
+
 #from sklearn.preprocessing import OneHotEncoder
 #from sklearn.cross_validation import train_test_split
-import numpy as np
-import pandas as pd
+
 
 
 # Construct the argument parse and parse the arguments
-ap = argparse.ArgumentParser()
+ap = argparse.ArgumentParser(prog = 'LABEL', add_help=True)
 ap.add_argument("-i", "--image", required=True,
 	help="path to the input image")
 ap.add_argument("-m","--model", required=True,
@@ -45,7 +47,7 @@ t1 = time.time()
 # Load image file
 print()
 print("[INFO] loading and preprocessing image...")
-image_input = image_utils.load_img(args["image"], target_size=(128, 128))
+image_input = image_utils.load_img(args["image"], target_size=(32, 32))
 image_array = image_utils.img_to_array(image_input)
 
 # If specified, normalize the image from 0-255 to 0-1
