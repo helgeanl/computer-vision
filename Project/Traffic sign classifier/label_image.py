@@ -21,7 +21,7 @@ from keras.utils import plot_model
 
 
 # Construct the argument parse and parse the arguments
-ap = argparse.ArgumentParser(prog = 'LABEL', add_help=True)
+ap = argparse.ArgumentParser()
 ap.add_argument("-i", "--image", required=True,
 	help="path to the input image")
 ap.add_argument("-m","--model", required=True,
