@@ -1,5 +1,5 @@
 ### Dependencies
-Python3, keras, numpy, pandas, graphviz
+Python3, keras 2.0, numpy, pandas, graphviz
 
 ### Label an image
 To predict the class of an image run:
