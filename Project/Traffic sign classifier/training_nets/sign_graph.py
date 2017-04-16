@@ -10,6 +10,8 @@ import keras
 #from parser import load_data
 
 
+#Total params: 16,571,223
+
 # dimensions of our images.
 img_width, img_height = 32, 32
 
@@ -60,11 +62,6 @@ num_filters7 = 128
 drop_prob = 0.5
 
 
-a = Input(shape=(32,))
-b = Dense(32)(a)
-model = Model(inputs=a, outputs=b)
-
-
 inputs = Input(shape=input_shape)
 
 conv_1 = Conv2D(num_filters1, filter_size1, padding='same', activation='relu')(inputs)
@@ -89,6 +86,10 @@ flatten_3 = Flatten()(dropout_3)
 
 merged_vector = keras.layers.concatenate([flatten_1, flatten_2,flatten_3], axis=1)
 
+#merged_vector = keras.layers.concatenate([dropout_1, dropout_2,dropout_3], axis=-1)
+#flatten = Flatten()(merged_vector)
+
+#fc_1 = Dense(1024,activation='relu', name='fc1')(flatten)
 fc_1 = Dense(1024,activation='relu', name='fc1')(merged_vector)
 dropout_4 = Dropout(0.5)(fc_1)
 fc_2 = Dense(1024,activation='relu', name='fc2')(dropout_4)
@@ -104,9 +105,14 @@ model.compile(loss='categorical_crossentropy',
               metrics=['accuracy'])
 
 print(model.summary())
-plot_model(model, to_file='model_graph.png')
-# this is the augmentation configuration we will use for training
-train_datagen = ImageDataGenerator(
+#plot_model(model, to_file='model_graph.png')
+
+
+
+# Don't train just yet
+if False:
+    # this is the augmentation configuration we will use for training
+    train_datagen = ImageDataGenerator(
         rescale=1./255,
         shear_range=0.2,
         zoom_range=0.2,
@@ -115,59 +121,59 @@ train_datagen = ImageDataGenerator(
         #width_shift_range=0.2,
         #fill_mode='nearest')
 
-# this is the augmentation configuration we will use for testing:
-# only rescaling
-test_datagen = ImageDataGenerator(rescale=1./255)
+    # this is the augmentation configuration we will use for testing:
+    # only rescaling
+    test_datagen = ImageDataGenerator(rescale=1./255)
 
-# this is a generator that will read pictures found in
-# subfolers of 'data/train', and indefinitely generate
-# batches of augmented image data
-train_generator = train_datagen.flow_from_directory(
+    # this is a generator that will read pictures found in
+    # subfolers of 'data/train', and indefinitely generate
+    # batches of augmented image data
+    train_generator = train_datagen.flow_from_directory(
         train_data_dir,  # this is the target directory
         target_size=(img_width, img_height),  # all images will be resized to 150x150
         batch_size=batch_size,
         class_mode='categorical')  # since we use binary_crossentropy loss, we need binary labels
-# the predict_generator method returns the output of a model, given
-# a generator that yields batches of numpy data
-#bottleneck_features_train = model.predict_generator(generator, nb_train_samples)
-# save the output as a Numpy array
-#np.save(open('bottleneck_features_train.npy', 'w'), bottleneck_features_train)
+    # the predict_generator method returns the output of a model, given
+    # a generator that yields batches of numpy data
+    #bottleneck_features_train = model.predict_generator(generator, nb_train_samples)
+    # save the output as a Numpy array
+    #np.save(open('bottleneck_features_train.npy', 'w'), bottleneck_features_train)
 
-# this is a similar generator, for validation data
-validation_generator = test_datagen.flow_from_directory(
+    # this is a similar generator, for validation data
+    validation_generator = test_datagen.flow_from_directory(
         validation_data_dir,
         target_size=(img_width, img_height),
         batch_size=batch_size,
         class_mode='categorical')
 
 
-#bottleneck_features_validation = model.predict_generator(generator, nb_validation_samples)
-#np.save(open('bottleneck_features_validation.npy', 'w'), bottleneck_features_validation)
+    #bottleneck_features_validation = model.predict_generator(generator, nb_validation_samples)
+    #np.save(open('bottleneck_features_validation.npy', 'w'), bottleneck_features_validation)
 
 
-# model.fit_generator(
-#         train_generator,
-#         steps_per_epoch=nb_train_samples // batch_size,
-#         epochs=epochs,
-#         validation_data=validation_generator,
-#         validation_steps=nb_validation_samples // batch_size)
+    # model.fit_generator(
+    #         train_generator,
+    #         steps_per_epoch=nb_train_samples // batch_size,
+    #         epochs=epochs,
+    #         validation_data=validation_generator,
+    #         validation_steps=nb_validation_samples // batch_size)
 
-#model.save_weights('second_try.h5')  # always save your weights after training or during training
-# # serialize model to JSON
-# model_json = model.to_json()
-# with open("model.json", "w") as json_file:
-#     json_file.write(model_json)
+    #model.save_weights('second_try.h5')  # always save your weights after training or during training
+    # # serialize model to JSON
+    # model_json = model.to_json()
+    # with open("model.json", "w") as json_file:
+    #     json_file.write(model_json)
 
 
 
-#load weights into new model
-model.load_weights("graph_weights.h5")
-#print("Loaded model from disk")
-model.save('model_graph.h5')
-#score = model.evaluate_generator(validation_generator, steps = 10000)
-#print("%s: %.2f%%" % (model.metrics_names[1], score[1]*100))
-#
-#
+    #load weights into new model
+    model.load_weights("graph_weights.h5")
+    #print("Loaded model from disk")
+    model.save('model_graph.h5')
+    #score = model.evaluate_generator(validation_generator, steps = 10000)
+    #print("%s: %.2f%%" % (model.metrics_names[1], score[1]*100))
+    #
+    #
 
 
 #predictions = model.predict_generator(validation_generator, steps=1)
