@@ -62,6 +62,10 @@ else:
 Model inspired by the GoogLeNet paper, Szegedy et. al, 2014
 (With batch normalization, Szegedy et. al, 2015 )
 """
+# Batch normalization have the advantage that we can have higher learning rate,
+# and the normalization is a regularization process in itself, meaning that we can decrease
+# the need for dropout. In this model we have only dropout in the last layer, and drecreased the dropout
+# down to 10%, from 40% in the original paper.
 inputs = Input(shape=input_shape)
 
 low_layer = Conv2D(64, 7, strides=2, padding='same',activation='relu')(inputs)
@@ -73,9 +77,8 @@ low_layer = BatchNormalization()(low_layer)
 inception_layer1 = MaxPooling2D(pool_size=(3, 3),padding='same',strides=2)(low_layer)
 inception_layer1a = inception_module(inception_layer1)
 inception_layer1b = inception_module(inception_layer1a)
-inception_layer1c = inception_module(inception_layer1b)
 
-inception_layer2 = MaxPooling2D(pool_size=(3, 3),padding='same',strides=2)(inception_layer1c)
+inception_layer2 = MaxPooling2D(pool_size=(3, 3),padding='same',strides=2)(inception_layer1b)
 inception_layer2a = inception_module(inception_layer2)
 inception_layer2b = inception_module(inception_layer2a)
 inception_layer2c = inception_module(inception_layer2b)
@@ -95,16 +98,22 @@ higher_layer = BatchNormalization()(higher_layer)
 predictions = Dense(43,activation='softmax')(higher_layer)
 
 model = Model(inputs=inputs, outputs=predictions)
+
+# Default learning rate to the Adam optimizer is 0.001, but with batch normalization
+# we can increase the learning rate up to 0.0075.
+# The Batch Normalizion paper, Szegedy et. al, 2015, observed that they could
+# turn the knob up to 0.045 and still get a better result without the weights going heywire up to infinity.
+# The learning rate of 0.045 gave the best result, but 0.0075 was actually the fastest option.
+adam = keras.optimizers.Adam(lr=0.0075)
 model.compile(loss='categorical_crossentropy',
-              optimizer='adam',
+              optimizer=adam,
               metrics=['accuracy'])
-# initial learning rate of 0.0015?
-#The initial learning rate was increased by a factor of 5, to 0.0075.
+
 """
 Print and plot model
 """
 print(model.summary())
-plot_model(model, to_file='model_incpetion.png')
+#plot_model(model, to_file='model_incpetion.png')
 
 
 # Don't train just yet?
