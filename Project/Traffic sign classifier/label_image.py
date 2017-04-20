@@ -15,10 +15,6 @@ from keras.models import load_model
 from keras.preprocessing import image as image_utils
 from keras.utils import plot_model
 
-#from sklearn.preprocessing import OneHotEncoder
-#from sklearn.cross_validation import train_test_split
-
-
 
 # Construct the argument parse and parse the arguments
 ap = argparse.ArgumentParser()

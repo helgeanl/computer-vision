@@ -7,7 +7,6 @@ from keras.utils import plot_model
 from keras.models import Model
 import keras
 
-#from preprocessing import histogram_eq
 
 """
 Inception module as given in the GoogLeNet paper, Szegedy et. al, 2014
@@ -81,11 +80,13 @@ inception_layer2 = inception_module(inception_layer2)
 inception_layer2 = inception_module(inception_layer2)
 
 higher_layer = AveragePooling2D(pool_size=(8,8),strides=1)(inception_layer2)
-higher_layer = Dropout(0.1)(higher_layer)
 higher_layer = Flatten()(higher_layer)
 higher_layer = Dense(1024,activation='relu')(higher_layer)
 higher_layer = BatchNormalization()(higher_layer)
-
+higher_layer = Dropout(0.2)(higher_layer)
+higher_layer = Dense(1024,activation='relu')(higher_layer)
+higher_layer = BatchNormalization()(higher_layer)
+higher_layer = Dropout(0.2)(higher_layer)
 predictions = Dense(43,activation='softmax')(higher_layer)
 
 model = Model(inputs=inputs, outputs=predictions)
@@ -95,7 +96,8 @@ model = Model(inputs=inputs, outputs=predictions)
 # The Batch Normalizion paper, Szegedy et. al, 2015, observed that they could
 # turn the knob up to 0.045 and still get a better result without the weights going heywire up to infinity.
 # The learning rate of 0.045 gave the best result, but 0.0075 was actually the fastest option.
-adam = keras.optimizers.Adam(lr=0.0075)
+#adam = keras.optimizers.Adam(lr=0.045)
+lr = 0.045
 model.compile(loss='categorical_crossentropy',
               optimizer=adam,
               metrics=['accuracy'])
@@ -104,11 +106,14 @@ model.compile(loss='categorical_crossentropy',
 Print and plot model
 """
 print(model.summary())
-plot_model(model, to_file='model_incpetion_small.png')
+#plot_model(model, to_file='model_incpetion_small.png')
 
+
+def lr_schedule(epoch):
+     return lr*(0.1**int(epoch/10))
 
 # Don't train just yet?
-if True:
+if False:
 
     """
     Augmentation configuration for the training data
@@ -116,20 +121,15 @@ if True:
     train_datagen = ImageDataGenerator(
         rescale = 1./255, # Normalize the image data from 0-255 to 0-1
         shear_range=0.2,
-        zoom_range=0.3,
+        zoom_range=0.2,
         rotation_range=20,
-        width_shift_range=0.2,
-        #preprocessing_function= histogram_eq,
-        # Preprocessing with local histogram equalization/
-        # contrast normalization could be an advantage
-        height_shift_range=0.2)
+        )
 
 
     """
     Augmentation configuration for the validation data
     """
     test_datagen = ImageDataGenerator(
-                    #preprocessing_function= histogram_eq,
                     rescale=1./255)
 
     """
@@ -160,11 +160,13 @@ if True:
             steps_per_epoch=nb_train_samples // batch_size,
             epochs=epochs,
             verbose = 1,
+            callbacks=[LearningRateScheduler(lr_schedule),
+                       ModelCheckpoint('inception_small2.h5',save_best_only=True)],
             validation_data=validation_generator,
             validation_steps=nb_validation_samples // batch_size)
 
-    model.save_weights('incpetion_weights_small.h5')
-    model.save('inception_small.h5')
+    #model.save_weights('incpetion_weights_small.h5')
+    #model.save('inception_small.h5')
 
     """
     Evaulate the trained model with the validation data

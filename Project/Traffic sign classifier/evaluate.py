@@ -1,11 +1,7 @@
 from keras.models import Sequential
 from keras.models import load_model
 from keras.preprocessing.image import ImageDataGenerator
-
 import argparse
-
-__author__ = "Helge-André Langåker"
-
 
 
 # construct the argument parse and parse the arguments
@@ -15,8 +11,6 @@ ap.add_argument("-d","--validation_data_dir", required=True,
 	help="path to the validation data directory")
 ap.add_argument("-m","--model", required=True,
 	help="path to the model in .h5 format")
-ap.add_argument("-b","--batch_size", required=True,
-	help="Size of batch")
 args = vars(ap.parse_args())
 
 batch_size = 128
@@ -24,7 +18,6 @@ img_height = 32
 img_width = 32
 
 test_datagen = ImageDataGenerator(rescale=1./255)
-# this is a similar generator, for validation data
 validation_generator = test_datagen.flow_from_directory(
         args["validation_data_dir"],
         target_size=(img_width, img_height),
@@ -35,5 +28,5 @@ validation_generator = test_datagen.flow_from_directory(
 model = load_model(args["model"])
 
 
-score = model.evaluate_generator(validation_generator, steps = 100)
+score = model.evaluate_generator(validation_generator, steps = 10000)
 print("%s: %.2f%%" % (model.metrics_names[1], score[1]*100))

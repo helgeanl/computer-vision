@@ -94,7 +94,7 @@ higher_layer = Dropout(0.1)(higher_layer)
 higher_layer = Flatten()(higher_layer)
 higher_layer = Dense(1000,activation='relu')(higher_layer)
 higher_layer = BatchNormalization()(higher_layer)
-
+higher_layer = Dropout(0.1)(higher_layer)
 predictions = Dense(43,activation='softmax')(higher_layer)
 
 model = Model(inputs=inputs, outputs=predictions)
@@ -127,11 +127,12 @@ if False:
         shear_range=0.2,
         zoom_range=0.3,
         rotation_range=20,
-        width_shift_range=0.2,
+        #width_shift_range=0.2,
         #preprocessing_function= histogram_eq,
         # Preprocessing with local histogram equalization/
         # contrast normalization could be an advantage
-        height_shift_range=0.2)
+        #height_shift_range=0.2
+        )
 
 
     """
