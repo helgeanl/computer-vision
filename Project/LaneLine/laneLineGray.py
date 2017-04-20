@@ -41,6 +41,25 @@ PREV_RIGHT_X2 = None
 def pause():
     programPause = input("Press the <ENTER> key to continue...")
 
+def histogram_eq(img):
+    # CLAHE (Contrast Limited Adaptive Histogram Equalization)
+    clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8,8))
+
+    img_yuv = cv2.cvtColor(img, cv2.COLOR_BGR2YUV)
+    #img = clahe.apply(img)
+    # equalize the histogram of the Y channel
+    #img_yuv[:,:,0] = cv2.equalizeHist(img_yuv[:,:,0])
+
+
+
+    img_yuv[:,:,0] = clahe.apply(img_yuv[:,:,0])
+    img_yuv[:,:,1] = clahe.apply(img_yuv[:,:,1])
+    img_yuv[:,:,2] = clahe.apply(img_yuv[:,:,2])
+
+    # convert the YUV image back to RGB format
+    img_output = cv2.cvtColor(img_yuv, cv2.COLOR_YUV2BGR)
+    return img
+
 def rgbToHsv(img):
     return cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
 
@@ -189,6 +208,7 @@ def weightImage(img, initial_img, α=1., β=1., λ=0.):
 def processImage(base_img):
     global BASE_IMG, CANNY_IMG
     BASE_IMG = base_img
+    image = histogram_eq(base_img)
     ysize = base_img.shape[0]
     xsize = base_img.shape[1]
     colorsize = base_img.shape[2]
@@ -224,7 +244,7 @@ def processImage(base_img):
 # mimg.imsave(new_file,new_img)
 
 
-inputfile = 'challenge2_short'
+inputfile = 'challenge2_1'
 outputfile = inputfile + '_outputGRAY.mp4'
 clip1 = VideoFileClip(inputfile+'.mp4')  
 white_clip = clip1.fl_image(processImage)  # NOTE: this function expects color images!!
