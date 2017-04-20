@@ -224,7 +224,7 @@ def processImage(base_img):
 # mimg.imsave(new_file,new_img)
 
 
-inputfile = 'challenge2_3'
+inputfile = 'challenge2_short'
 outputfile = inputfile + 'outputHSV.mp4'
 clip1 = VideoFileClip(inputfile+'.mp4')  
 white_clip = clip1.fl_image(processImage)  # NOTE: this function expects color images!!

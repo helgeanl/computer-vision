@@ -210,7 +210,6 @@ def processImage(base_img):
             dtype=np.int32
         )
     )
-    print('Image shape: ', image.shape)
     image = hough_lines(image, 1, np.pi / 90, 100, 15, 10)
     #print(BASE_IMG.shape, ' - ', CANNY_IMG.shape, ' - ', HOUGH_IMG.shape)
 
@@ -225,7 +224,7 @@ def processImage(base_img):
 # mimg.imsave(new_file,new_img)
 
 
-inputfile = 'challenge2_3'
+inputfile = 'challenge2_short'
 outputfile = inputfile + '_outputGRAY.mp4'
 clip1 = VideoFileClip(inputfile+'.mp4')  
 white_clip = clip1.fl_image(processImage)  # NOTE: this function expects color images!!
