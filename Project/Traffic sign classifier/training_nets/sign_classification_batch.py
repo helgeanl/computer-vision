@@ -4,13 +4,17 @@ from keras.layers import Conv2D, MaxPooling2D, BatchNormalization
 from keras.layers import Activation, Dropout, Flatten, Dense
 from keras import backend as K
 from keras.utils import plot_model
-
+from keras.optimizers import Adam
+from keras.callbacks import LearningRateScheduler, ModelCheckpoint
+#from preprocessing import histogram_eq
+import numpy as np
+import cv2
 
 # dimensions of our images.
 img_width, img_height = 32, 32
 
-train_data_dir = 'data/train'
-validation_data_dir = 'data/validation'
+train_data_dir = '../data/train'
+validation_data_dir = '../data/validation'
 
 
 nb_train_samples = 39000
@@ -19,9 +23,19 @@ epochs = 50
 batch_size = 128
 
 if K.image_data_format() == 'channels_first':
-    input_shape = (3, img_width, img_height)
+    input_shape = (1, img_width, img_height)
 else:
-    input_shape = (img_width, img_height, 3)
+    input_shape = (img_width, img_height, 1)
+
+
+def histogram_eq(img):
+    # CLAHE (Contrast Limited Adaptive Histogram Equalization)
+    clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(4,4))
+    img = img[:,:,0].astype(np.uint8)
+    img = clahe.apply(img)
+    img = img.astype(np.float64)
+    img = np.reshape(img,(32,32,1))
+    return img
 
 
 ## Convlayer 0
@@ -72,28 +86,37 @@ model.add(BatchNormalization())
 model.add(Flatten())
 model.add(Dense(1024,activation='relu', name='fc1'))
 model.add(BatchNormalization())
+#model.add(Dropout(0.1))
 # Second fully connected layer
 model.add(Dense(1024, activation='relu', name='fc2'))
 model.add(BatchNormalization())
+#model.add(Dropout(0.1))
 # Last fully connected layer
 model.add(Dense(43,activation='softmax', name='predictions'))
 # Compile model
 model.compile(loss='categorical_crossentropy',
-              optimizer='adam',
+              optimizer=Adam(lr=0.001, beta_1=0.9, beta_2=0.999, epsilon=1e-08, decay=0.0001),
               metrics=['accuracy'])
 
 print(model.summary())
 #plot_model(model, to_file='model_batch.png')
+lr = 0.045
+def lr_schedule(epoch):
+    if epoch > 10:
+
+     return lr*(0.1**int(epoch/10))
 
 # Don't train just yet?
-if False:
+if True:
 
     """
     Augmentation configuration for the training data
     """
     train_datagen = ImageDataGenerator(
         rescale = 1./255, # Normalize the image data from 0-255 to 0-1
-        shear_range=0.2,
+        #shear_range=0.2,
+        zca_whitening = True,
+        preprocessing_function= histogram_eq,
         zoom_range=0.3,
         rotation_range=20,
         )
@@ -103,7 +126,9 @@ if False:
     Augmentation configuration for the validation data
     """
     test_datagen = ImageDataGenerator(
-                    rescale=1./255)
+                    rescale=1./255,
+                    zca_whitening = True,
+                    preprocessing_function= histogram_eq)
 
     """
     The generator will go through the subfolders in 'train_data_dir' and find
@@ -113,6 +138,7 @@ if False:
         train_data_dir,
         target_size=(img_width, img_height),
         batch_size=batch_size,
+        color_mode = 'grayscale',
         class_mode='categorical')
 
     """
@@ -123,6 +149,7 @@ if False:
         validation_data_dir,
         target_size=(img_width, img_height),
         batch_size=batch_size,
+        color_mode = 'grayscale',
         class_mode='categorical')
 
     """
@@ -133,11 +160,13 @@ if False:
             steps_per_epoch=nb_train_samples // batch_size,
             epochs=epochs,
             verbose = 1,
+            #callbacks=[LearningRateScheduler(lr_schedule),
+            #           ModelCheckpoint('model_batch_drop',save_best_only=True)],
             validation_data=validation_generator,
             validation_steps=nb_validation_samples // batch_size)
 
-    model.save_weights('model_batch_weights.h5')
-    model.save('model_batch.h5')
+    #model.save_weights('model_batch_weights.h5')
+    model.save('model_batch_drop_hist.h5')
 
     """
     Evaulate the trained model with the validation data

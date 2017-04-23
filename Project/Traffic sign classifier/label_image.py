@@ -4,17 +4,22 @@ Predict the class of an image
 args : [-h] -i IMAGE -m MODEL [--info INFO] [--plot_model PLOT_MODEL]
              [--plot_name PLOT_NAME] [-n NORMALIZE] [-p PROBABILITIES]
 
+args :  [-h] -i IMAGE -m MODEL [--info INFO]
+        [--plot_model PLOT_MODEL] [--plot_name PLOT_NAME]
+        [-n NORMALIZE] [-p PROBABILITIES] [-g GRAYSCALE]
+        [-s IMAGE_SIZE]
+
 """
 
 import argparse
 import numpy as np
 import pandas as pd
 import time as time
-
+import cv2
 from keras.models import load_model
 from keras.preprocessing import image as image_utils
 from keras.utils import plot_model
-
+from preprocessing import histogram_eq
 
 # Construct the argument parse and parse the arguments
 ap = argparse.ArgumentParser()
@@ -32,6 +37,10 @@ ap.add_argument("-n","--normalize", required=False, default=True,
 	help="Name of the model")
 ap.add_argument("-p","--probabilities", required=False, default=False,
 	help="Show the probabilities")
+ap.add_argument("-g","--grayscale", required=False, default=False,
+	help="Only use grayscale images and histogram equalization")
+ap.add_argument("-s","--image_size", required=False, default=32,
+	help="Size of the input image to the model")
 args = vars(ap.parse_args())
 
 # Load the CNN model with weights (.h5 file)
@@ -45,19 +54,31 @@ if args["info"]:
 if args["plot_model"]:
     plot_model(model, to_file=args["plot_name"])
 
+img_width = args["image_size"]
+img_height = args["image_size"]
+
 # Start time
 t1 = time.time()
 
 # Load image file
 print()
 print("[INFO] loading and preprocessing image...")
-image_input = image_utils.load_img(args["image"], target_size=(32, 32))
+image_input = image_utils.load_img(args["image"], target_size=(img_width, img_height))
+
 image_array = image_utils.img_to_array(image_input)
 
-# If specified, normalize the image from 0-255 to 0-1
-if args["normalize"]:
-    image_array = np.array(image_array)*1./255
-image = np.expand_dims(image_array, axis=0)
+# Gray scale?
+if args["grayscale"]:
+    image_array = cv2.cvtColor(image_array, cv2.COLOR_BGR2GRAY)
+    clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(4,4))
+    image_array = image_array.astype(np.uint8)
+    image_array = clahe.apply(image_array)
+    image_array = image_array.astype(np.float64)
+    image = np.reshape(image_array,(1,img_width,img_height,1))
+else:
+    image = np.reshape(image_array,(1,img_width,img_height,3))
+
+image_array = np.array(image_array)*1./255
 
 # Predict the class of the image
 print("[INFO] classifying image...")

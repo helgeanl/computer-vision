@@ -6,7 +6,10 @@ from keras import backend as K
 from keras.utils import plot_model
 from keras.models import Model
 import keras
-
+from keras.optimizers import Adam
+from keras.callbacks import LearningRateScheduler, ModelCheckpoint
+import numpy as np
+import cv2
 
 """
 Inception module as given in the GoogLeNet paper, Szegedy et. al, 2014
@@ -32,6 +35,14 @@ def inception_module(prev_layer):
     # Depth concatenate
     return keras.layers.concatenate([strain_1, strain_2,strain_3,strain_4], axis=-1)
 
+def histogram_eq(img):
+    # CLAHE (Contrast Limited Adaptive Histogram Equalization)
+    clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(4,4))
+    img = img[:,:,0].astype(np.uint8)
+    img = clahe.apply(img)
+    img = img.astype(np.float64)
+    img = np.reshape(img,(32,32,1))
+    return img
 
 """
 Directories to training data and validation data
@@ -53,9 +64,9 @@ Define the size of the input image, and check which format to use
 """
 img_width, img_height = 32, 32
 if K.image_data_format() == 'channels_first':
-    input_shape = (3, img_width, img_height)
+    input_shape = (1, img_width, img_height)
 else:
-    input_shape = (img_width, img_height, 3)
+    input_shape = (img_width, img_height, 1)
 
 """
 Model inspired by the GoogLeNet paper, Szegedy et. al, 2014
@@ -97,9 +108,9 @@ model = Model(inputs=inputs, outputs=predictions)
 # turn the knob up to 0.045 and still get a better result without the weights going heywire up to infinity.
 # The learning rate of 0.045 gave the best result, but 0.0075 was actually the fastest option.
 #adam = keras.optimizers.Adam(lr=0.045)
-lr = 0.045
+#lr = 0.045
 model.compile(loss='categorical_crossentropy',
-              optimizer=adam,
+              optimizer=Adam(lr=0.001, beta_1=0.9, beta_2=0.999, epsilon=1e-08, decay=0.001),
               metrics=['accuracy'])
 
 """
@@ -123,6 +134,8 @@ if False:
         shear_range=0.2,
         zoom_range=0.2,
         rotation_range=20,
+        zca_whitening = True,
+        preprocessing_function= histogram_eq
         )
 
 
@@ -130,7 +143,9 @@ if False:
     Augmentation configuration for the validation data
     """
     test_datagen = ImageDataGenerator(
-                    rescale=1./255)
+                    rescale=1./255,
+                    zca_whitening = True,
+                    preprocessing_function= histogram_eq)
 
     """
     The generator will go through the subfolders in 'train_data_dir' and find
@@ -140,6 +155,7 @@ if False:
         train_data_dir,
         target_size=(img_width, img_height),
         batch_size=batch_size,
+        color_mode = 'grayscale',
         class_mode='categorical')
 
     """
@@ -150,6 +166,7 @@ if False:
         validation_data_dir,
         target_size=(img_width, img_height),
         batch_size=batch_size,
+        color_mode = 'grayscale',
         class_mode='categorical')
 
     """
@@ -160,7 +177,7 @@ if False:
             steps_per_epoch=nb_train_samples // batch_size,
             epochs=epochs,
             verbose = 1,
-            callbacks=[LearningRateScheduler(lr_schedule),
+            callbacks=[#LearningRateScheduler(lr_schedule),
                        ModelCheckpoint('inception_small2.h5',save_best_only=True)],
             validation_data=validation_generator,
             validation_steps=nb_validation_samples // batch_size)
