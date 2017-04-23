@@ -5,7 +5,10 @@
 # 3. Turn every pixel that is neither white or yellow black. 
 # 4. Apply Canny Edge detection to detect quick changes in color in neighbouring pixels
 # 5. Define region of interest
-# 6. Hough Transform inside the region of interest. This will extract lines passing through all the edge points and group by similaritty. This wil group the edge points located on the same line.
+# 6. Hough Transform inside the region of interest.
+#		This will extract lines passing through all the edge points and group by similaritty.
+#		This wil group the edge points located on the same line.
+#		If no lines are found, use canny edge detector + Hough on grayscale image instead
 # 7. Filter the lines with horizontal slopes
 # 8. Distinguish beetween left and right lane
 # 9. Compute Linear Regression
