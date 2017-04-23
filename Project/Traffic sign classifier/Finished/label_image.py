@@ -1,14 +1,10 @@
 """
 Predict the class of an image
 
-args : [-h] -i IMAGE -m MODEL [--info INFO] [--plot_model PLOT_MODEL]
-             [--plot_name PLOT_NAME] [-n NORMALIZE] [-p PROBABILITIES]
-
 args :  [-h] -i IMAGE -m MODEL [--info INFO]
         [--plot_model PLOT_MODEL] [--plot_name PLOT_NAME]
         [-n NORMALIZE] [-p PROBABILITIES] [-g GRAYSCALE]
         [-s IMAGE_SIZE]
-
 """
 
 import argparse

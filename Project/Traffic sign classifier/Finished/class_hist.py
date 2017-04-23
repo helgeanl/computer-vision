@@ -110,7 +110,7 @@ model.compile(loss='categorical_crossentropy',
               metrics=['accuracy'])
 
 print(model.summary())
-plot_model(model, to_file='model_class_hist.png')
+#plot_model(model, to_file='model_class_hist.png')
 
 # Don't train just yet?
 if False:
