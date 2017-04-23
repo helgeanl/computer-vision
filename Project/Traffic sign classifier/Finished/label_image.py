@@ -15,7 +15,7 @@ import cv2
 from keras.models import load_model
 from keras.preprocessing import image as image_utils
 from keras.utils import plot_model
-from preprocessing import histogram_eq
+
 
 # Construct the argument parse and parse the arguments
 ap = argparse.ArgumentParser()
@@ -33,7 +33,7 @@ ap.add_argument("-n","--normalize", required=False, default=True,
 	help="Name of the model")
 ap.add_argument("-p","--probabilities", required=False, default=False,
 	help="Show the probabilities")
-ap.add_argument("-g","--grayscale", required=False, default=False,
+ap.add_argument("-g","--grayscale", required=False, default=True,
 	help="Only use grayscale images and histogram equalization")
 ap.add_argument("-s","--image_size", required=False, default=32,
 	help="Size of the input image to the model")
@@ -59,22 +59,24 @@ t1 = time.time()
 # Load image file
 print()
 print("[INFO] loading and preprocessing image...")
-image_input = image_utils.load_img(args["image"], target_size=(img_width, img_height))
 
-image_array = image_utils.img_to_array(image_input)
 
 # Gray scale?
 if args["grayscale"]:
-    image_array = cv2.cvtColor(image_array, cv2.COLOR_BGR2GRAY)
-    clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(4,4))
-    image_array = image_array.astype(np.uint8)
-    image_array = clahe.apply(image_array)
-    image_array = image_array.astype(np.float64)
-    image = np.reshape(image_array,(1,img_width,img_height,1))
+    #image_array = cv2.cvtColor(image_array, cv2.COLOR_BGR2GRAY)
+    image_input = image_utils.load_img(args["image"], grayscale=True,target_size=(img_width, img_height))
+    image = image_utils.img_to_array(image_input)
+    #clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(4,4))
+    #image = image.astype(np.uint8)
+    #image = clahe.apply(image)
+    #image = image.astype(np.float64)
+    image = np.reshape(image,(1,img_width,img_height,1))
 else:
-    image = np.reshape(image_array,(1,img_width,img_height,3))
+    image_input = image_utils.load_img(args["image"],target_size=(img_width, img_height))
+    image = image_utils.img_to_array(image_input)
+    image = np.reshape(image,(1,img_width,img_height,3))
 
-image_array = np.array(image_array)*1./255
+image = np.array(image)*1./255
 
 # Predict the class of the image
 print("[INFO] classifying image...")
