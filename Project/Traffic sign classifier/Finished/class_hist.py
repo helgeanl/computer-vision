@@ -97,9 +97,9 @@ model.add(Dense(1024,activation='relu', name='fc1'))
 model.add(BatchNormalization())
 model.add(Dropout(0.2))
 # Second fully connected layer
-model.add(Dense(1024, activation='relu', name='fc2'))
-model.add(BatchNormalization())
-model.add(Dropout(0.3))
+#model.add(Dense(1024, activation='relu', name='fc2'))
+#model.add(BatchNormalization())
+#model.add(Dropout(0.3))
 # Last fully connected layer
 model.add(Dense(43,activation='softmax', name='predictions'))
 # Compile model
@@ -110,7 +110,7 @@ model.compile(loss='categorical_crossentropy',
               metrics=['accuracy'])
 
 print(model.summary())
-#plot_model(model, to_file='model_class_hist.png')
+plot_model(model, to_file='model_class_hist.png')
 
 # Don't train just yet?
 if False:
